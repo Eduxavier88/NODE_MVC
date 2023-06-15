@@ -5,7 +5,7 @@ module.exports = class TaskController {
     res.render("tasks/create");
   }
 
-  static async createTaskSave(req, res) {
+  static createTaskSave(req, res) {
     const task = {
       title: req.body.title,
       description: req.body.description,
@@ -16,31 +16,66 @@ module.exports = class TaskController {
       .then(res.redirect("/tasks"))
       .catch((err) => console.log());
   }
-  static async taskRemove(req, res) {
-    const id = req.body.id;
-    await Task.destroy({ where: { id: id } });
-    res.redirect("/tasks");
-  }
-  static async updateTask(req, res) {
-    const id = req.params.id;
-    const task = await Task.findOne({ where: { id: id }, raw: true });
 
-    res.render("tasks/edit", { task });
+  static showTasks(req, res) {
+    Task.findAll({ raw: true })
+      .then((data) => {
+        let emptyTasks = false;
+
+        if (data.length === 0) {
+          emptyTasks = true;
+        }
+
+        res.render("tasks/all", { tasks: data, emptyTasks });
+      })
+      .catch((err) => console.log(err));
   }
-  static async updateTaskPost(req, res) {
-    const id = req.body.id; //tudo que vier de formularios html
+
+  static removeTask(req, res) {
+    const id = req.body.id;
+
+    Task.destroy({ where: { id: id } })
+      .then(res.redirect("/tasks"))
+      .catch((err) => console.log());
+  }
+
+  static updateTask(req, res) {
+    const id = req.params.id;
+
+    Task.findOne({ where: { id: id }, raw: true })
+      .then((data) => {
+        res.render("tasks/edit", { task: data });
+      })
+      .catch((err) => console.log());
+  }
+
+  static updateTaskPost(req, res) {
+    const id = req.body.id;
 
     const task = {
       title: req.body.title,
       description: req.body.description,
     };
-    await Task.update(task, { where: { id: id } });
-    res.redirect("/tasks");
+
+    Task.update(task, { where: { id: id } })
+      .then(res.redirect("/tasks"))
+      .catch((err) => console.log());
   }
 
-  static async showTasks(req, res) {
-    const tasks = await Task.findAll({ raw: true });
-    res.render("tasks/all", { tasks });
+  static toggleTaskStatus(req, res) {
+    const id = req.body.id;
+
+    console.log(req.body);
+
+    const task = {
+      done: req.body.done === "0" ? true : false,
+    };
+
+    console.log(task);
+
+    Task.update(task, { where: { id: id } })
+      .then(res.redirect("/tasks"))
+      .catch((err) => console.log());
   }
 };
 //Dentro dessa função, há uma linha que diz "res.render("tasks/create")".
