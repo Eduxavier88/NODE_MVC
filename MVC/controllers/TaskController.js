@@ -65,8 +65,6 @@ module.exports = class TaskController {
   static toggleTaskStatus(req, res) {
     const id = req.body.id;
 
-    console.log(req.body);
-
     const task = {
       done: req.body.done === "0" ? true : false,
     };
